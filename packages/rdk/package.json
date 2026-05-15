@@ -1,0 +1,19 @@
+{
+  "name": "@responsible-design-kit/rdk",
+  "version": "0.0.1",
+  "description": "CLI for the Responsible Design Kit — scaffold accessible, inclusive and responsible UI patterns.",
+  "bin": {
+    "rdk": "bin/rdk.js"
+  },
+  "files": [
+    "bin",
+    "templates"
+  ],
+  "keywords": [
+    "accessibility",
+    "a11y",
+    "responsible-design",
+    "inclusive-design"
+  ],
+  "license": "MIT"
+}
