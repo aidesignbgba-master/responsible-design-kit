@@ -3,40 +3,711 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Responsible Design Kit</title>
+    <title>responsible-design-kit — Verantwortungsvolles Design als Default</title>
     <meta
       name="description"
-      content="A practical skillset for building accessible, inclusive and responsible digital products."
+      content="KI-Tools bauen, was sie gefragt werden — ohne Rücksicht auf Barrierefreiheit, Nutzervielfalt oder Gendergerechtigkeit. Das responsible-design-kit ändert den Default."
     />
     <style>
+      /* ---------- Design-Tokens ---------- */
       :root {
-        color-scheme: light dark;
-        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        /* Farben – vorab gegen WCAG 2.2 AA (≥ 4,5:1 Text, ≥ 3:1 UI) geprüft */
+        --bg: #ffffff;
+        --bg-alt: #f4f5f7;
+        --surface: #ffffff;
+        --border: #d2d6dc;
+        --text: #16181d; /* auf --bg: ~16,8:1 */
+        --text-muted: #4a4f57; /* auf --bg: ~8,9:1 */
+        --accent: #1b4dd1; /* auf --bg: ~6,4:1 */
+        --accent-hover: #163fab;
+        --accent-text: #ffffff; /* auf --accent: ~6,4:1 */
+        --code-bg: #16181d;
+        --code-text: #f4f5f7;
+        --focus: #1b4dd1;
+        --success: #0a6b3c; /* auf --bg: ~5,5:1 */
+
+        --maxw: 64rem;
+        --measure: 38rem; /* ~65 Zeichen Zeilenlänge */
+        --radius: 12px;
+        --space: clamp(1rem, 4vw, 2rem);
+
+        color-scheme: light;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
       body {
-        max-width: 42rem;
-        margin: 0 auto;
-        padding: 3rem 1.5rem;
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
         line-height: 1.6;
+        font-size: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
+        -webkit-font-smoothing: antialiased;
       }
-      h1 {
-        font-size: clamp(2rem, 5vw, 3rem);
-        margin-bottom: 0.5rem;
+
+      /* ---------- Fokus: durchgängig deutlich sichtbar ---------- */
+      :focus-visible {
+        outline: 3px solid var(--focus);
+        outline-offset: 3px;
+        border-radius: 4px;
       }
-      p.lede {
+
+      /* ---------- Skip-Link ---------- */
+      .skip-link {
+        position: absolute;
+        left: 0.75rem;
+        top: -100px;
+        z-index: 100;
+        background: var(--accent);
+        color: var(--accent-text);
+        padding: 0.75rem 1.25rem;
+        border-radius: 0 0 var(--radius) var(--radius);
+        text-decoration: none;
+        font-weight: 600;
+        transition: top 0.15s ease;
+      }
+      .skip-link:focus {
+        top: 0;
+      }
+
+      /* ---------- Layout-Helfer ---------- */
+      .wrap {
+        width: 100%;
+        max-width: var(--maxw);
+        margin-inline: auto;
+        padding-inline: var(--space);
+      }
+
+      section {
+        padding-block: clamp(3rem, 8vw, 5.5rem);
+      }
+      section.alt {
+        background: var(--bg-alt);
+      }
+
+      h1,
+      h2,
+      h3 {
+        line-height: 1.2;
+        letter-spacing: -0.01em;
+        text-wrap: balance;
+      }
+      h2 {
+        font-size: clamp(1.6rem, 1.2rem + 1.8vw, 2.25rem);
+        margin-top: 0;
+        margin-bottom: 1rem;
+      }
+      h3 {
         font-size: 1.25rem;
-        opacity: 0.8;
+        margin: 0 0 0.5rem;
+      }
+
+      p {
+        max-width: var(--measure);
+      }
+
+      a {
+        color: var(--accent);
+        text-underline-offset: 0.15em;
+      }
+      a:hover {
+        color: var(--accent-hover);
+      }
+
+      /* ---------- Header / Nav ---------- */
+      .site-header {
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        background: color-mix(in srgb, var(--bg) 92%, transparent);
+        backdrop-filter: blur(8px);
+        z-index: 50;
+      }
+      .site-header .wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        min-height: 64px;
+      }
+      .brand {
+        font-weight: 700;
+        font-size: 1.05rem;
+        text-decoration: none;
+        color: var(--text);
+        font-family: ui-monospace, "SFMono-Regular", "Consolas", monospace;
+      }
+      .nav-links {
+        display: flex;
+        gap: clamp(0.75rem, 3vw, 1.75rem);
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .nav-links a {
+        text-decoration: none;
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+      .nav-links a:hover {
+        color: var(--accent);
+      }
+      @media (max-width: 36rem) {
+        .nav-links {
+          display: none;
+        }
+      }
+
+      /* ---------- Buttons / CTAs ---------- */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 48px;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius);
+        font-size: 1.0625rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: background 0.15s ease, border-color 0.15s ease;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: var(--accent-text);
+      }
+      .btn-primary:hover {
+        background: var(--accent-hover);
+        color: var(--accent-text);
+      }
+      .btn-secondary {
+        background: transparent;
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+      .btn-secondary:hover {
+        background: color-mix(in srgb, var(--accent) 8%, transparent);
+        color: var(--accent-hover);
+      }
+
+      /* ---------- Hero ---------- */
+      .hero {
+        padding-block: clamp(3.5rem, 10vw, 7rem);
+      }
+      .hero h1 {
+        font-size: clamp(2.25rem, 1.5rem + 4vw, 4rem);
+        margin: 0 0 1.25rem;
+        max-width: 18ch;
+      }
+      .hero .subline {
+        font-size: clamp(1.15rem, 1rem + 0.7vw, 1.5rem);
+        color: var(--text-muted);
+        max-width: 46ch;
+        margin: 0 0 2rem;
+      }
+      .cta-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      /* ---------- Problem-Section ---------- */
+      .problem-questions {
+        font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2.25rem);
+        font-weight: 700;
+        line-height: 1.25;
+        color: var(--text);
+        max-width: 20ch;
+        margin: 0 0 1.5rem;
+      }
+      .problem-questions span {
+        color: var(--accent);
+      }
+      .problem-close {
+        font-weight: 600;
+        font-size: 1.15rem;
+      }
+
+      /* ---------- Skills ---------- */
+      .section-intro {
+        font-size: 1.15rem;
+        color: var(--text-muted);
+        max-width: var(--measure);
+        margin-bottom: 2.5rem;
+      }
+      .skills-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+      }
+      @media (max-width: 56rem) {
+        .skills-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .skill-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.75rem;
+        display: flex;
+        flex-direction: column;
+      }
+      .skill-card .name {
+        font-family: ui-monospace, "SFMono-Regular", "Consolas", monospace;
+        font-size: 1.2rem;
+        color: var(--accent);
+      }
+      .skill-card .claim {
+        font-style: italic;
+        color: var(--text);
+        font-weight: 500;
+        margin: 0 0 0.75rem;
+      }
+      .skill-card p {
+        color: var(--text-muted);
+        max-width: none;
+      }
+      .skill-card .relevant {
+        margin-top: auto;
+        padding-top: 1rem;
+        font-size: 0.95rem;
+        color: var(--text);
+      }
+      .skill-card .relevant strong {
+        color: var(--text);
+      }
+
+      .self-proof {
+        margin-top: 2rem;
+        padding: 1rem 1.25rem;
+        border-left: 4px solid var(--accent);
+        background: color-mix(in srgb, var(--accent) 6%, transparent);
+        border-radius: 0 var(--radius) var(--radius) 0;
+        font-weight: 500;
+        max-width: var(--measure);
+      }
+
+      /* ---------- Für wen ---------- */
+      .audience-list {
+        margin: 0 0 2rem;
+        padding-left: 1.25rem;
+        max-width: var(--measure);
+      }
+      .audience-list li {
+        margin-bottom: 0.6rem;
+      }
+      .no-prereq {
+        font-size: 1.2rem;
+        font-weight: 600;
+        border-top: 1px solid var(--border);
+        padding-top: 1.5rem;
+        max-width: var(--measure);
+      }
+
+      /* ---------- Installation ---------- */
+      .code-block {
+        position: relative;
+        background: var(--code-bg);
+        color: var(--code-text);
+        border-radius: var(--radius);
+        padding: 1.25rem 1.5rem;
+        margin: 0 0 1.5rem;
+        max-width: var(--measure);
+        overflow-x: auto;
+      }
+      .code-block pre {
+        margin: 0;
+        font-family: ui-monospace, "SFMono-Regular", "Consolas", monospace;
+        font-size: 1.05rem;
+        white-space: pre;
+        padding-right: 7rem;
+      }
+      .code-block .prompt {
+        color: #8aa0d8;
+        user-select: none;
+      }
+      .copy-btn {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        min-height: 40px;
+        min-width: 44px;
+        padding: 0.4rem 0.9rem;
+        background: var(--accent-text);
+        color: var(--code-bg);
+        border: 2px solid transparent;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+      }
+      .copy-btn:hover {
+        background: #e3e6ec;
+      }
+      .copy-btn[data-copied="true"] {
+        background: var(--success);
+        color: #fff;
+      }
+      .install-meta {
+        max-width: var(--measure);
+        color: var(--text-muted);
+      }
+      .install-meta p {
+        max-width: none;
+      }
+      .install-meta strong {
+        color: var(--text);
+      }
+      :target {
+        scroll-margin-top: 80px;
+      }
+      [tabindex="-1"]:focus {
+        outline: none;
+      }
+
+      /* ---------- Hintergrund ---------- */
+      .research-questions {
+        max-width: var(--measure);
+        margin: 1.5rem 0;
+        padding-left: 1.25rem;
+        border-left: 3px solid var(--border);
+        font-weight: 500;
+        color: var(--text);
+        display: grid;
+        gap: 1rem;
+      }
+
+      /* ---------- Footer ---------- */
+      .site-footer {
+        border-top: 1px solid var(--border);
+        background: var(--bg-alt);
+        padding-block: 2.5rem;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+      }
+      .site-footer p {
+        max-width: none;
+        margin: 0.25rem 0;
+      }
+      .footer-links {
+        display: flex;
+        gap: 1.5rem;
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0 0;
+        flex-wrap: wrap;
+      }
+
+      /* ---------- Reduced motion ---------- */
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        * {
+          transition: none !important;
+        }
       }
     </style>
   </head>
   <body>
-    <main>
-      <h1>Responsible Design Kit</h1>
-      <p class="lede">
-        A practical skillset for building accessible, inclusive and responsible
-        digital products inside modern development environments.
-      </p>
-      <p>Bald mehr.</p>
+    <a class="skip-link" href="#main">Zum Hauptinhalt springen</a>
+
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="#top">responsible-design-kit</a>
+        <nav aria-label="Hauptnavigation">
+          <ul class="nav-links">
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#fuer-wen">Für wen</a></li>
+            <li><a href="#installation">Installation</a></li>
+            <li><a href="#hintergrund">Hintergrund</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- Section 1 — Hero -->
+      <section class="hero" id="top">
+        <div class="wrap">
+          <h1>Verantwortungsvolles Design. Als Default.</h1>
+          <p class="subline">
+            KI-Tools bauen, was sie gefragt werden — ohne Rücksicht auf
+            Barrierefreiheit, Nutzervielfalt oder Gendergerechtigkeit. Das
+            responsible-design-kit ändert den Default.
+          </p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#installation">Jetzt installieren</a>
+            <a
+              class="btn btn-secondary"
+              href="https://github.com/responsible-design-kit/responsible-design-kit"
+            >
+              GitHub Repository →
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2 — Das Problem -->
+      <section class="alt" aria-labelledby="problem-title">
+        <div class="wrap">
+          <h2 id="problem-title">Das Problem</h2>
+          <p class="problem-questions">
+            KI-Coding-Tools optimieren für das, was gefragt wird. Niemand fragt
+            sie: <span>Für wen? Zu wessen Lasten?</span>
+          </p>
+          <p>
+            Ohne expliziten Kontext arbeiten diese Systeme mit impliziten
+            Annahmen — der statistische Durchschnitt der Trainingsdaten: jung,
+            gesund, sehend, technisch versiert. Barrierefreiheit,
+            Nutzerzentrierung und Genderinklusion entstehen so nicht von selbst.
+            Sie entstehen nur, wenn jemand explizit danach fragt — oder wenn das
+            System so eingerichtet ist, dass es automatisch fragt.
+          </p>
+          <p class="problem-close">Das zweite ist der Ansatz dieses Projekts.</p>
+        </div>
+      </section>
+
+      <!-- Section 3 — Die drei Skills -->
+      <section id="skills" aria-labelledby="skills-title">
+        <div class="wrap">
+          <h2 id="skills-title">Die drei Skills</h2>
+          <p class="section-intro">
+            Ein Skill ist eine Instruktionsdatei, die einem KI-Tool sagt, wann
+            es aktiv wird, was es prüft und wie es antwortet. Kein Prompt. Keine
+            Checkliste. Ein strukturierter Default.
+          </p>
+
+          <div class="skills-grid">
+            <article class="skill-card">
+              <h3 class="name">user-centricity</h3>
+              <p class="claim">
+                Nutzende als Menschen — nicht als abstrakten „User“
+              </p>
+              <p>
+                Wer nutzt das? In welcher Situation? Was wird übersehen? Der
+                Skill erzwingt, dass diese Fragen vor jedem generierten Output
+                beantwortet werden. Edge Cases werden Required Input. Personas
+                werden einbezogen, bevor Code entsteht.
+              </p>
+              <p class="relevant">
+                <strong>Relevant für:</strong> UX-Design,
+                Interface-Entwicklung, partizipative Systeme.
+              </p>
+            </article>
+
+            <article class="skill-card">
+              <h3 class="name">accessibility</h3>
+              <p class="claim">
+                WCAG 2.2 AA — als Ausgangspunkt, nicht als Nachbesserung
+              </p>
+              <p>
+                Barrierefreiheit ist seit Juni 2025 gesetzlich gefordert (EU
+                Accessibility Act, BFSG). Trotzdem entsteht sie in KI-generierten
+                Interfaces selten von selbst. Der Skill prüft automatisch:
+                Kontrastverhältnisse, Tastaturnavigation, semantisches HTML,
+                ARIA-Labels, Focus-Styles. Probleme werden markiert — bevor sie
+                im Code landen.
+              </p>
+              <p class="relevant">
+                <strong>Relevant für:</strong> Alle digitalen Interfaces,
+                öffentliche Dienste, Apps mit gesetzlicher
+                Barrierefreiheitspflicht.
+              </p>
+            </article>
+
+            <article class="skill-card">
+              <h3 class="name">gender-equity</h3>
+              <p class="claim">
+                Inklusive Sprache und Bias-Bewusstsein als Default
+              </p>
+              <p>
+                KI-Systeme übernehmen Annahmen aus Trainingsdaten — über Sprache,
+                Formulare, Datensätze. Dieser Skill macht diese Annahmen sichtbar
+                und verändert den Default. Genderinklusive Sprache, keine binären
+                Pflichtfelder, Bias-Hinweise bei datensensitiven Systemen.
+                Relevant für Systeme unter EU AI Act High-Risk-Klassifikation.
+              </p>
+              <p class="relevant">
+                <strong>Relevant für:</strong> Medizinische Interfaces,
+                HR-Systeme, öffentliche Plattformen.
+              </p>
+            </article>
+          </div>
+
+          <p class="self-proof">
+            Diese Seite wurde mit dem Kit gebaut. Prüf sie: Tastatur,
+            Screenreader, Kontrast-Checker, „Quelltext anzeigen“ — die Prinzipien
+            stehen nicht nur hier, sie sind im Code belegt.
+          </p>
+        </div>
+      </section>
+
+      <!-- Section 4 — Für wen -->
+      <section id="fuer-wen" class="alt" aria-labelledby="audience-title">
+        <div class="wrap">
+          <h2 id="audience-title">Für wen</h2>
+          <p>
+            Das responsible-design-kit ist für alle, die KI-gestützt entwerfen
+            oder entwickeln:
+          </p>
+          <ul class="audience-list">
+            <li>Designer:innen, die mit Cline, Cursor oder Claude Code arbeiten</li>
+            <li>Entwickler:innen, die Designverantwortung tragen</li>
+            <li>
+              Teams, die Responsible AI nicht nur als Compliance, sondern als
+              Qualitätsmerkmal verstehen
+            </li>
+          </ul>
+          <p class="no-prereq">
+            Du brauchst kein Vorwissen über Barrierefreiheit, Gender Studies oder
+            Nutzerforschung. Das Kit bringt das Wissen mit.
+          </p>
+        </div>
+      </section>
+
+      <!-- Section 5 — Installation -->
+      <section id="installation" aria-labelledby="install-title" tabindex="-1">
+        <div class="wrap">
+          <h2 id="install-title">Installation</h2>
+
+          <div class="code-block">
+            <pre><code id="install-cmd"><span class="prompt">$ </span>npx responsible-design-kit init</code></pre>
+            <button
+              type="button"
+              class="copy-btn"
+              id="copy-btn"
+              data-command="npx responsible-design-kit init"
+              aria-label="Befehl kopieren"
+            >
+              Kopieren
+            </button>
+          </div>
+
+          <div class="install-meta">
+            <p>
+              Das war es. Der Befehl kopiert <code>.claude/</code> mit
+              <code>CLAUDE.md</code> und den drei <code>SKILL.md</code>-Dateien
+              in dein Projektverzeichnis. Ab dem nächsten Prompt arbeitet dein
+              KI-Tool mit den Skills.
+            </p>
+            <p>
+              <strong>Voraussetzung:</strong> Node.js installiert · Cline (VS
+              Code), Cursor oder Claude Code als KI-Tool
+            </p>
+            <p>
+              <strong>Alternativ:</strong> Dateien direkt aus dem
+              <a
+                href="https://github.com/responsible-design-kit/responsible-design-kit"
+                >GitHub Repository</a
+              >
+              kopieren. Kein npm nötig.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6 — Hintergrund -->
+      <section id="hintergrund" class="alt" aria-labelledby="bg-title">
+        <div class="wrap">
+          <h2 id="bg-title">Hintergrund</h2>
+          <p>
+            Das responsible-design-kit ist ein Open-Source-Semesterprojekt der
+            BGBA University of Cooperative Education Hanau, entstanden im Modul
+            <em>KI im Designprozess</em> (SS 2026).
+          </p>
+          <p>Es untersucht zwei Fragen:</p>
+          <div class="research-questions">
+            <p>
+              Verbessert sich der Output messbar, wenn ein Skill installiert
+              ist?
+            </p>
+            <p>
+              Erhöht ein reduzierter gefühlter Aufwand die Bereitschaft,
+              verantwortungsvolle Anforderungen überhaupt umzusetzen?
+            </p>
+          </div>
+          <p>
+            Die Antworten entstehen gerade. Die Ergebnisse werden hier und im
+            GitHub Repository dokumentiert.
+          </p>
+        </div>
+      </section>
     </main>
+
+    <!-- Section 7 — Footer -->
+    <footer class="site-footer">
+      <div class="wrap">
+        <p>responsible-design-kit — Open Source · MIT License</p>
+        <p>BGBA SS 2026 · Felix Guder &amp; Architects</p>
+        <ul class="footer-links">
+          <li>
+            <a
+              href="https://github.com/responsible-design-kit/responsible-design-kit"
+              >GitHub Repository</a
+            >
+          </li>
+          <li>
+            <a
+              href="https://github.com/responsible-design-kit/responsible-design-kit/blob/main/README.md"
+              >Dokumentation</a
+            >
+          </li>
+        </ul>
+      </div>
+    </footer>
+
+    <script>
+      // Progressive Enhancement: Der Codeblock ist auch ohne JS
+      // markier- und kopierbar. Dieser Button ist reiner Komfort.
+      (function () {
+        const btn = document.getElementById("copy-btn");
+        if (!btn || !navigator.clipboard) {
+          // Kein Clipboard-API: Button ausblenden, Befehl bleibt markierbar.
+          if (btn) btn.hidden = true;
+          return;
+        }
+        const label = "Kopieren";
+        let resetTimer;
+        btn.addEventListener("click", async function () {
+          try {
+            await navigator.clipboard.writeText(btn.dataset.command);
+            btn.textContent = "Kopiert ✓";
+            btn.dataset.copied = "true";
+            clearTimeout(resetTimer);
+            resetTimer = setTimeout(function () {
+              btn.textContent = label;
+              btn.removeAttribute("data-copied");
+            }, 2500);
+          } catch (e) {
+            btn.textContent = "Fehler – manuell kopieren";
+          }
+        });
+      })();
+
+      // Fokus-Management: Anker-CTA verschiebt den Tastatur-Fokus
+      // tatsächlich in die Ziel-Section, nicht nur die Scrollposition.
+      document.querySelectorAll('a[href^="#"]').forEach(function (link) {
+        link.addEventListener("click", function (e) {
+          const id = link.getAttribute("href").slice(1);
+          const target = document.getElementById(id);
+          if (target) {
+            target.focus({ preventScroll: true });
+          }
+        });
+      });
+    </script>
   </body>
 </html>
