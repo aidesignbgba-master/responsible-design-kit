@@ -15,5 +15,9 @@
     "responsible-design",
     "inclusive-design"
   ],
+  "scripts": {
+    "validate-skills": "node bin/skill-validate.js",
+    "list-skills": "node bin/skill-load.js"
+  },
   "license": "MIT"
 }
